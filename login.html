@@ -106,79 +106,23 @@ html,body{height:100%;background:var(--n2);font-family:var(--font);color:var(--n
         <span class="ds-label">Design System</span>
       </div>
 
-      <!-- tabs -->
-      <div class="auth-tabs">
-        <button class="auth-tab active" id="tab-signin" type="button">Sign in</button>
-        <button class="auth-tab" id="tab-register" type="button">Create account</button>
-      </div>
-
-      <!-- ── SIGN IN PANEL ── -->
-      <div class="panel active" id="panel-signin">
-        <p class="panel-title">Welcome back</p>
-        <p class="panel-sub">Internal access — DispatchTrack team</p>
+      <!-- ── PASSPHRASE PANEL ── -->
+      <div id="panel-signin">
+        <p class="panel-title">Welcome</p>
+        <p class="panel-sub">Enter the access passphrase to continue</p>
 
         <div id="msg-signin" class="msg"></div>
 
         <form id="form-signin" novalidate>
           <div class="field">
-            <label for="si-email">Email</label>
-            <input id="si-email" type="email" placeholder="you@dispatchtrack.com" autocomplete="email" required>
-          </div>
-          <div class="field">
-            <label for="si-password">Password</label>
-            <input id="si-password" type="password" placeholder="••••••••" autocomplete="current-password" required>
+            <label for="si-password">Passphrase</label>
+            <input id="si-password" type="password" placeholder="••••••••" autocomplete="current-password" required autofocus>
           </div>
           <button type="submit" class="btn" id="btn-signin">
-            <span class="btn-txt">Sign in</span>
+            <span class="btn-txt">Enter</span>
             <span class="spin"></span>
           </button>
         </form>
-      </div>
-
-      <!-- ── REGISTER PANEL ── -->
-      <div class="panel" id="panel-register">
-
-        <!-- success state (shown after sign-up) -->
-        <div class="success-state" id="register-success">
-          <div class="success-icon">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#00875A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-          </div>
-          <p style="font:700 16px var(--font);color:var(--n7);text-align:center">Check your inbox</p>
-          <p style="font:400 13px/1.5 var(--font);color:var(--n5);text-align:center">We sent a confirmation link to<br><strong id="confirm-email" style="color:var(--n7)"></strong></p>
-          <p style="font:400 12px var(--font);color:var(--n5);text-align:center;margin-top:4px">Click the link to activate your account, then sign in.</p>
-          <button type="button" class="btn" style="margin-top:8px" onclick="switchTab('signin')">
-            <span class="btn-txt">Back to sign in</span>
-          </button>
-        </div>
-
-        <!-- register form -->
-        <div id="register-form-wrap">
-          <p class="panel-title">Create account</p>
-          <p class="panel-sub">Only <strong>@dispatchtrack.com</strong> emails allowed</p>
-
-          <div id="msg-register" class="msg"></div>
-
-          <form id="form-register" novalidate>
-            <div class="field">
-              <label for="reg-email">Work email</label>
-              <input id="reg-email" type="email" placeholder="you@dispatchtrack.com" autocomplete="email" required>
-              <div class="domain-hint" id="email-hint"></div>
-            </div>
-            <div class="field">
-              <label for="reg-password">Password</label>
-              <input id="reg-password" type="password" placeholder="Min. 8 characters" autocomplete="new-password" required minlength="8">
-            </div>
-            <div class="field">
-              <label for="reg-confirm">Confirm password</label>
-              <input id="reg-confirm" type="password" placeholder="Repeat password" autocomplete="new-password" required>
-            </div>
-            <button type="submit" class="btn" id="btn-register">
-              <span class="btn-txt">Create account</span>
-              <span class="spin"></span>
-            </button>
-          </form>
-        </div>
-
       </div>
 
     </div>
@@ -186,37 +130,19 @@ html,body{height:100%;background:var(--n2);font-family:var(--font);color:var(--n
 
 </div>
 
-<script src="supabase-config.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script>
-(async () => {
-  const ALLOWED_DOMAIN = 'dispatchtrack.com';
-  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+(() => {
+  const PASS = 'guess-diego.lavandero';
 
-  // Already logged in → go straight to the app
-  const { data: { session } } = await sb.auth.getSession();
-  if (session) { location.replace('index.html'); return; }
+  // Already unlocked this session → go straight to the app
+  if (sessionStorage.getItem('ds_auth') === '1') {
+    location.replace('index.html'); return;
+  }
 
-  /* ── tab switching ── */
-  window.switchTab = function(tab) {
-    document.getElementById('tab-signin').classList.toggle('active', tab === 'signin');
-    document.getElementById('tab-register').classList.toggle('active', tab === 'register');
-    document.getElementById('panel-signin').classList.toggle('active', tab === 'signin');
-    document.getElementById('panel-register').classList.toggle('active', tab === 'register');
-    clearMsg('signin'); clearMsg('register');
-  };
-  document.getElementById('tab-signin').addEventListener('click', () => switchTab('signin'));
-  document.getElementById('tab-register').addEventListener('click', () => switchTab('register'));
-
-  /* ── message helpers ── */
-  function showMsg(panel, text, type) {
-    const el = document.getElementById('msg-' + panel);
+  function showMsg(text, type) {
+    const el = document.getElementById('msg-signin');
     el.textContent = text;
     el.className = 'msg ' + type;
-  }
-  function clearMsg(panel) {
-    const el = document.getElementById('msg-' + panel);
-    el.className = 'msg'; el.textContent = '';
   }
 
   function setLoading(btn, on) {
@@ -224,81 +150,20 @@ html,body{height:100%;background:var(--n2);font-family:var(--font);color:var(--n
     btn.disabled = on;
   }
 
-  /* ── sign in ── */
-  document.getElementById('form-signin').addEventListener('submit', async (e) => {
+  document.getElementById('form-signin').addEventListener('submit', (e) => {
     e.preventDefault();
-    clearMsg('signin');
-    const email    = document.getElementById('si-email').value.trim();
-    const password = document.getElementById('si-password').value;
-    if (!email || !password) { showMsg('signin', 'Please fill in all fields.', 'error'); return; }
+    const input = document.getElementById('si-password').value;
+    const btn   = document.getElementById('btn-signin');
 
-    const btn = document.getElementById('btn-signin');
-    setLoading(btn, true);
-    const { error } = await sb.auth.signInWithPassword({ email, password });
-    if (error) { showMsg('signin', error.message, 'error'); setLoading(btn, false); return; }
-    showMsg('signin', 'Signing you in…', 'info');
-    location.replace('index.html');
-  });
-
-  /* ── register: live email domain hint ── */
-  document.getElementById('reg-email').addEventListener('input', function() {
-    const hint = document.getElementById('email-hint');
-    const val  = this.value.trim();
-    if (!val) { hint.textContent = ''; hint.className = 'domain-hint'; return; }
-    if (val.endsWith('@' + ALLOWED_DOMAIN) || val.includes('@' + ALLOWED_DOMAIN)) {
-      hint.textContent = '✓ Valid DispatchTrack email';
-      hint.className = 'domain-hint';
-      hint.style.color = '#00875A';
-      this.classList.remove('invalid');
-    } else if (val.includes('@')) {
-      hint.textContent = '✗ Only @' + ALLOWED_DOMAIN + ' emails are allowed';
-      hint.className = 'domain-hint bad';
-      hint.style.color = '';
-      this.classList.add('invalid');
+    if (input === PASS) {
+      setLoading(btn, true);
+      sessionStorage.setItem('ds_auth', '1');
+      location.replace('index.html');
     } else {
-      hint.textContent = '';
-      hint.className = 'domain-hint';
+      showMsg('Incorrect passphrase. Try again.', 'error');
+      document.getElementById('si-password').value = '';
+      document.getElementById('si-password').focus();
     }
-  });
-
-  /* ── register: submit ── */
-  document.getElementById('form-register').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    clearMsg('register');
-
-    const email    = document.getElementById('reg-email').value.trim().toLowerCase();
-    const password = document.getElementById('reg-password').value;
-    const confirm  = document.getElementById('reg-confirm').value;
-
-    // Domain check
-    if (!email.endsWith('@' + ALLOWED_DOMAIN)) {
-      showMsg('register', 'Only @' + ALLOWED_DOMAIN + ' email addresses can register.', 'error');
-      return;
-    }
-    if (password.length < 8) {
-      showMsg('register', 'Password must be at least 8 characters.', 'error');
-      return;
-    }
-    if (password !== confirm) {
-      showMsg('register', 'Passwords do not match.', 'error');
-      return;
-    }
-
-    const btn = document.getElementById('btn-register');
-    setLoading(btn, true);
-
-    const { error } = await sb.auth.signUp({ email, password });
-
-    if (error) {
-      showMsg('register', error.message, 'error');
-      setLoading(btn, false);
-      return;
-    }
-
-    // Show success state
-    document.getElementById('confirm-email').textContent = email;
-    document.getElementById('register-form-wrap').style.display = 'none';
-    document.getElementById('register-success').classList.add('show');
   });
 })();
 </script>
