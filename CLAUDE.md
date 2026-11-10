@@ -1,8 +1,5 @@
 # dt-design-system — Deploy mirror, NOT the working repo
 
-> **2026-11-10:** la raíz de este sitio ahora sirve el DS nuevo (React + Tailwind, build de `dt-design-system-package`, ruta `#/docs`). El DS anterior en HTML quedó intacto en `/legacy/`. `colors_and_type.css` sigue en la raíz porque los prototipos del portafolio lo linkean.
-
-
 **Do not design or build screens directly in this repo.** This is the deploy
 target for Vercel. The actual working repo — where the design system is
 developed, where `sections/*.json` and `renderers.js` live, where DES-XXX
